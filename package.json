@@ -1,0 +1,22 @@
+{
+  "name": "com.conit.devconsole",
+  "version": "1.0.0",
+  "displayName": "Developer Console",
+  "description": "An in-game Lua-powered developer console for Unity.",
+  "unity": "2022.3",
+  "dependencies": {
+    "com.unity.inputsystem": "1.7.0",
+    "com.unity.ugui": "1.0.0"
+  },
+  "keywords": [ "console", "developer", "lua", "debug", "moonsharp" ],
+  "author": {
+    "name": "Con IT"
+  },
+  "samples": [
+    {
+      "displayName": "Example Commands",
+      "description": "Sample command classes showing how to extend the console.",
+      "path": "Samples~/ExampleCommands"
+    }
+  ]
+}

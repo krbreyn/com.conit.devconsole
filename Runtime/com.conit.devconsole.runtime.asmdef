@@ -1,0 +1,17 @@
+{
+  "name": "DevConsole.Runtime",
+  "rootNamespace": "DevConsole",
+  "references": [
+    "Unity.InputSystem"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "MoonSharp.Interpreter.dll"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "noEngineReferences": false
+}
