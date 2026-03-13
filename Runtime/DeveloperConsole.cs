@@ -10,7 +10,6 @@ namespace DevConsole
     {
         [Header("Console Settings")]
         public Key toggleKey = Key.Backquote; // ` key to open/close
-        public int maxLogLines = 100;
         public float scrollSpeed = 0.1f;
 
         // UI references (created at runtime)
@@ -25,7 +24,7 @@ namespace DevConsole
         private bool isOpen;
         private string savedInput = string.Empty;
 
-        public MoonSharpConsole console;
+        public ConsoleEngine console;
 
         // Input blocking
         private PlayerInput[] cachedPlayerInputs;
@@ -37,7 +36,7 @@ namespace DevConsole
             BuildConsoleUI();
             consolePanel.SetActive(false);
 
-            console = new MoonSharpConsole(Log, LogError);
+            console = new ConsoleEngine(Log, LogError);
             console.RegisterCommands(new Commands(Log, LogError, logLines, commandHistory, outputText));
             // Capture Unity's debug log messages
             //Application.logMessageReceived += HandleUnityLog;
@@ -79,27 +78,20 @@ namespace DevConsole
             }
         }
 
-        // ───────────────────────── Public API ─────────────────────────
-
-        /// <summary>Log a plain message to the console.</summary>
         public void Log(string message)
         {
             AppendLog(message, "FFFFFF");
         }
 
-        /// <summary>Log a warning (yellow) to the console.</summary>
         public void LogWarning(string message)
         {
             AppendLog(message, "FFFF00");
         }
 
-        /// <summary>Log an error (red) to the console.</summary>
         public void LogError(string message)
         {
             AppendLog(message, "FF4444");
         }
-
-        // ───────────────────── Console Logic ──────────────────────
 
         private void ToggleConsole()
         {
@@ -219,9 +211,6 @@ namespace DevConsole
             //#endif
             logLines.Add($"<color=#{hexColor}>{message}</color>");
 
-            while (logLines.Count > maxLogLines)
-                logLines.RemoveAt(0);
-
             outputText.text = string.Join("\n", logLines) + "\n";
 
             LayoutRebuilder.ForceRebuildLayoutImmediate(outputText.rectTransform);
@@ -255,7 +244,6 @@ namespace DevConsole
         }
 
         #region UI
-        // ──────────────────── UI Construction ────────────────────
 
         private void BuildConsoleUI()
         {
@@ -444,92 +432,5 @@ namespace DevConsole
             return go;
         }
         #endregion
-    }
-
-    /// <summary>
-    /// Drag handle that moves the developer console panel by shifting all four anchors equally.
-    /// </summary>
-    public class ConsoleDragHandle : MonoBehaviour, IBeginDragHandler, IDragHandler
-    {
-        public RectTransform panelRT;
-
-        private Canvas rootCanvas;
-
-        public void OnBeginDrag(PointerEventData eventData)
-        {
-            if (rootCanvas == null)
-                rootCanvas = panelRT.GetComponentInParent<Canvas>().rootCanvas;
-        }
-
-        public void OnDrag(PointerEventData eventData)
-        {
-            if (rootCanvas == null) return;
-
-            Vector2 canvasSize = ((RectTransform)rootCanvas.transform).rect.size;
-            Vector2 delta = eventData.delta / canvasSize;
-
-            Vector2 minAnchor = panelRT.anchorMin + delta;
-            Vector2 maxAnchor = panelRT.anchorMax + delta;
-
-            // Clamp so the panel stays fully on screen
-            float width = maxAnchor.x - minAnchor.x;
-            float height = maxAnchor.y - minAnchor.y;
-
-            if (minAnchor.x < 0f) { minAnchor.x = 0f; maxAnchor.x = width; }
-            if (maxAnchor.x > 1f) { maxAnchor.x = 1f; minAnchor.x = 1f - width; }
-            if (minAnchor.y < 0f) { minAnchor.y = 0f; maxAnchor.y = height; }
-            if (maxAnchor.y > 1f) { maxAnchor.y = 1f; minAnchor.y = 1f - height; }
-
-            panelRT.anchorMin = minAnchor;
-            panelRT.anchorMax = maxAnchor;
-        }
-    }
-
-    /// <summary>
-    /// Drag handle that resizes the developer console panel by adjusting its anchors.
-    /// Attach to a small corner element; set resizeLeft / resizeRight to control which
-    /// horizontal edge moves. The bottom edge always moves vertically.
-    /// </summary>
-    public class ConsoleResizeHandle : MonoBehaviour, IBeginDragHandler, IDragHandler
-    {
-        public RectTransform panelRT;
-        public bool resizeLeft;
-        public bool resizeRight;
-
-        private Canvas rootCanvas;
-        private Vector2 minAnchor;
-        private Vector2 maxAnchor;
-
-        private const float MinWidth = 0.15f;  // minimum panel width  (fraction of screen)
-        private const float MinHeight = 0.10f; // minimum panel height (fraction of screen)
-
-        public void OnBeginDrag(PointerEventData eventData)
-        {
-            if (rootCanvas == null)
-                rootCanvas = panelRT.GetComponentInParent<Canvas>().rootCanvas;
-        }
-
-        public void OnDrag(PointerEventData eventData)
-        {
-            if (rootCanvas == null) return;
-
-            Vector2 canvasSize = ((RectTransform)rootCanvas.transform).rect.size;
-            Vector2 delta = eventData.delta / canvasSize;
-
-            minAnchor = panelRT.anchorMin;
-            maxAnchor = panelRT.anchorMax;
-
-            // Vertical: move the bottom edge (anchorMin.y)
-            minAnchor.y = Mathf.Clamp(minAnchor.y + delta.y, 0f, maxAnchor.y - MinHeight);
-
-            // Horizontal: move the appropriate side
-            if (resizeLeft)
-                minAnchor.x = Mathf.Clamp(minAnchor.x + delta.x, 0f, maxAnchor.x - MinWidth);
-            if (resizeRight)
-                maxAnchor.x = Mathf.Clamp(maxAnchor.x + delta.x, minAnchor.x + MinWidth, 1f);
-
-            panelRT.anchorMin = minAnchor;
-            panelRT.anchorMax = maxAnchor;
-        }
     }
 }

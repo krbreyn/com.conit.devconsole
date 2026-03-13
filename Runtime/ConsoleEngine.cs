@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace DevConsole
 {
-    public class MoonSharpConsole
+    public class ConsoleEngine
     {
         private readonly Script _script = new Script(CoreModules.Preset_SoftSandbox);
         private readonly List<(string Name, string Description)> _commands = new List<(string Name, string Description)>();
@@ -26,7 +26,7 @@ namespace DevConsole
             set => _instructionsPerTick = Math.Max(1, value);
         }
 
-        public MoonSharpConsole(Action<string> output, Action<string> debug)
+        public ConsoleEngine(Action<string> output, Action<string> debug)
         {
             _output = output;
             _debug = message => debug($"DEVCONSOLE DEBUG: {message}");
