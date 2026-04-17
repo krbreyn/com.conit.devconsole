@@ -49,7 +49,7 @@ namespace DevConsole
 #endif
         }
 
-        [LuaCommand("clear", "Clear the console")]
+        [LuaCommand("clear", "Clear the console")]    
         public void Clear()
         {
             logLines.Clear();
