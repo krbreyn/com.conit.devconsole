@@ -18,7 +18,7 @@ namespace DevConsole
         private Text outputText;
         private ScrollRect scrollRect;
 
-        private readonly List<string> logLines = new List<string>();
+        private List<string> logLines = new List<string>();
         private readonly List<string> commandHistory = new List<string>();
         private int historyIndex = -1;
         private bool isOpen;
@@ -204,12 +204,31 @@ namespace DevConsole
             inputField.caretPosition = inputField.text.Length;
         }
 
+		private string lastRawMessage;
+		private string lastColor;
+		private int repeatCount = 0;
+
         private void AppendLog(string message, string hexColor)
         {
             //#if UNITY_EDITOR || DEVELOPMENT_BUILD
             //        Debug.Log($"DeveloperConsole.AppendLog message='{message}' beforeCount={logLines.Count}");
             //#endif
-            logLines.Add($"<color=#{hexColor}>{message}</color>");
+		    if (message == lastRawMessage && hexColor == lastColor && logLines.Count > 0)
+		    {
+		        repeatCount++;
+		        string displayMessage = repeatCount > 1
+		            ? $"{message} x{repeatCount}"
+		            : message;
+		        logLines[logLines.Count - 1] =
+		            $"<color=#{hexColor}>{displayMessage}</color>";
+		    }
+		    else
+		    {
+		        lastRawMessage = message;
+		        lastColor = hexColor;
+		        repeatCount = 1;
+		        logLines.Add($"<color=#{hexColor}>{message}</color>");
+		    }
 
             outputText.text = string.Join("\n", logLines) + "\n";
 
@@ -267,7 +286,7 @@ namespace DevConsole
             // ── Console Panel (smaller, centered at top) ──
             consolePanel = CreatePanel(canvasGO.transform, "ConsolePanel",
                 new Color(0.1f, 0.1f, 0.1f, 0.92f),
-                new Vector2(0.1f, 0.6f), new Vector2(0.9f, 1f),
+                new Vector2(0.1f, 0.1f), new Vector2(0.9f, 1f),
                 new Vector2(0, 0), new Vector2(0, -10));
 
             // ── Scroll View (output log) ──
@@ -284,9 +303,9 @@ namespace DevConsole
             GameObject viewportGO = CreatePanel(scrollGO.transform, "Viewport",
                 Color.clear, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
             viewportGO.AddComponent<Mask>().showMaskGraphic = false;
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
-        viewportGO.GetComponent<Image>().color = new Color(1f, 0f, 1f, 0.05f);
-#endif
+	#if UNITY_EDITOR || DEVELOPMENT_BUILD
+	        viewportGO.GetComponent<Image>().color = new Color(1f, 0f, 1f, 0.05f);
+	#endif
             scrollRect.viewport = viewportGO.GetComponent<RectTransform>();
 
             // Content (holds the output text)

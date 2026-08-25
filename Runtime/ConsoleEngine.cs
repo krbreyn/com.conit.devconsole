@@ -103,8 +103,8 @@ end
                 if (coroutine.Coroutine.State != CoroutineState.Dead)
                 {
                     int id = _nextScriptId++;
-                    _runningScripts.Add(new RunningScript(id, lua.Trim(), coroutine));
                     _output($"[script #{id} started]");
+                    _runningScripts.Add(new RunningScript(id, lua.Trim(), coroutine));
                 }
             }
             catch (SyntaxErrorException ex)

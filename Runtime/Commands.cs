@@ -44,9 +44,9 @@ namespace DevConsole
         public void Quit()
         {
             Application.Quit();
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#endif
+		#if UNITY_EDITOR
+	        UnityEditor.EditorApplication.isPlaying = false;
+		#endif
         }
 
         [LuaCommand("clear", "Clear the console")]    
